@@ -2,8 +2,7 @@ from datetime import timedelta
 from django.db import models
 from django.contrib.auth import get_user_model
 
-
-User = get_user_model()
+from users.models import User
 
 
 class Recipes(models.Model):
@@ -60,7 +59,7 @@ class Ingredients(models.Model):
     title = models.CharField(max_length=200)
     amount = models.DecimalField(max_digits=4, decimal_places=1)
     slug = models.SlugField(unique=True)
-    description = models.TextField()
+    units = models.TextField(max_length=20)
 
     class Meta:
         verbose_name_plural = 'Ingredients'
