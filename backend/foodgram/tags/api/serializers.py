@@ -1,14 +1,10 @@
 from rest_framework import serializers
+from tags.models import Tag
+
+
 import webcolors
 
-from recipes.models import Recipes, Tag
-
-
-class RecipesSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Recipes
-        fields = '__all__'
-
+...
 
 class Hex2NameColor(serializers.Field):
     def to_representation(self, value):

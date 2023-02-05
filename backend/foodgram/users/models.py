@@ -16,3 +16,4 @@ class User(AbstractUser):
     password = models.CharField(max_length=128)
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)
+    is_subscribed = models.BooleanField(default=False)

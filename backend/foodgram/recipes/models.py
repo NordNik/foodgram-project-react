@@ -2,8 +2,9 @@ from datetime import timedelta
 from django.db import models
 from django.contrib.auth import get_user_model
 
+from tags.models import Tag
 from users.models import User
-
+        
 
 class Recipes(models.Model):
     author = models.ForeignKey(
@@ -24,12 +25,10 @@ class Recipes(models.Model):
         null=True,
         on_delete=models.SET_NULL,
         related_name='recipes')
-    tags = models.ForeignKey(
-        'Tags',
+    tags = models.ManyToManyField(
+        Tag,
         blank=True,
-        null=True,
-        on_delete=models.SET_NULL,
-        related_name='recipes')
+        related_name='tags')
     duration = models.DurationField(
         db_index=True,
         default=timedelta,
@@ -38,18 +37,6 @@ class Recipes(models.Model):
     class Meta:
         verbose_name_plural = 'Recipes'
         ordering = ['-duration']
-
-    def __str__(self):
-        return self.title
-
-
-class Tags(models.Model):
-    title = models.CharField(max_length=200)
-    slug = models.SlugField(unique=True)
-    description = models.TextField()
-
-    class Meta:
-        verbose_name_plural = 'Tags'
 
     def __str__(self):
         return self.title
