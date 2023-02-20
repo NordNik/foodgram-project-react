@@ -130,3 +130,8 @@ dmypy.json
 
 # .idea
 .idea
+
+#trash
+.vscode/
+.DS_Store
+csv_import.py
