@@ -1,10 +1,26 @@
-from datetime import timedelta
 from django.db import models
-from django.contrib.auth import get_user_model
 
-from tags.models import Tag
 from users.models import User
-        
+
+
+class Tag(models.Model):
+    name = models.CharField(max_length=200)
+    color = models.CharField(max_length=200)
+
+    def __str__(self):
+        return self.name
+
+
+class Ingredient(models.Model):
+    name = models.CharField(max_length=200)
+    measurement_unit = models.TextField(max_length=20)
+
+    class Meta:
+        verbose_name_plural = 'Ingredients'
+
+    def __str__(self):
+        return self.name
+
 
 class Recipes(models.Model):
     author = models.ForeignKey(
@@ -12,44 +28,44 @@ class Recipes(models.Model):
         on_delete=models.CASCADE,
         related_name='recipes'
     )
-    title = models.CharField(max_length=200)
+    name = models.CharField(max_length=200)
     image = models.ImageField(
         'Photo',
         upload_to='recipes/',
         blank=True
     )
     text = models.TextField()
-    ingredients = models.ForeignKey(
-        'Ingredients',
-        blank=True,
-        null=True,
-        on_delete=models.SET_NULL,
-        related_name='recipes')
+    ingredients = models.ManyToManyField(
+        Ingredient,
+        through='IngredientRecipes',
+        related_name='recipes'
+        )
     tags = models.ManyToManyField(
         Tag,
-        blank=True,
+        through='TagsRecipes',
         related_name='tags')
-    duration = models.DurationField(
-        db_index=True,
-        default=timedelta,
-        verbose_name='Duration')
-    
+    cooking_time = models.IntegerField(verbose_name='Duration')
+
     class Meta:
         verbose_name_plural = 'Recipes'
-        ordering = ['-duration']
+        ordering = ['-cooking_time']
 
     def __str__(self):
         return self.title
 
 
-class Ingredients(models.Model):
-    title = models.CharField(max_length=200)
-    amount = models.DecimalField(max_digits=4, decimal_places=1)
-    slug = models.SlugField(unique=True)
-    units = models.TextField(max_length=20)
-
-    class Meta:
-        verbose_name_plural = 'Ingredients'
+class IngredientRecipes(models.Model):
+    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
+    recipe = models.ForeignKey(Recipes, on_delete=models.CASCADE)
+    amount = models.DecimalField(max_digits=5, decimal_places=2, blank=True)
 
     def __str__(self):
-        return self.title
+        return f'{self.ingredient} {self.recipe} {self.amount}'
+
+
+class TagsRecipes(models.Model):
+    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
+    recipe = models.ForeignKey(Recipes, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f'{self.tag} {self.recipe}'
