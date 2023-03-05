@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from users.models import User
-from .permissions import IsAutheticatedOrRegistration
+# from .permissions import IsAutheticatedOrRegistration
 from recipes.models import Recipes, Tag, Ingredient
 from .paginator import UsersPagination, paginate_page
 from .serializers import (
@@ -15,8 +15,8 @@ from .serializers import (
 class RecipesViewSet(viewsets.ModelViewSet):
     queryset = Recipes.objects.all()
     serializer_class = RecipesSerializer
-    # paginator = [paginate_page]
-    # permission_classes = [IsAuthenticated]
+    paginator = [paginate_page]
+    permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -41,7 +41,6 @@ class TagsViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = (permissions.AllowAny, )
     filter_backends = (filters.SearchFilter, )
     search_fields = ('name',)
-    # lookup_field = 'slug' #with it cannot reach it by id only by slug
 
 
 class UsersViewSet(viewsets.ModelViewSet):

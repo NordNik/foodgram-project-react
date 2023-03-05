@@ -1,3 +1,4 @@
+from django.db.models import F
 from rest_framework import serializers
 import webcolors
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
@@ -10,6 +11,7 @@ from users.models import User
 
 
 class Hex2NameColor(serializers.Field):
+    """Transforms color tags to names"""
     def to_representation(self, value):
         return value
 
@@ -72,27 +74,51 @@ class RecipesSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def create(self, validated_data):
-        # ## !!!validate tags and ingredients before creating recipe!!! ###
+        """Create new recipe record in Recipe table"""
+
+        # removing ingredients and tags from data to create a simple recipe
+        # and then making manipulations with related models
         ingredients = validated_data.pop('ingredientrecipes_set')
         tags = validated_data.pop('tags')
         recipe = Recipes.objects.create(**validated_data)
+
+        # for each ingresient and tag create record in related model
         for ingredient in ingredients:
             current_ingredient = Ingredient.objects.get(
-                id=ingredient['ingredient']['id']
+                id=ingredient.get('ingredient').get('id')
             )
             IngredientRecipes.objects.create(
                 ingredient=current_ingredient,
                 recipe=recipe,
-                amount=ingredient['amount'])
+                amount=ingredient.get('amount'))
         for tag in tags:
-            current_tag = Tag.objects.get(
-                id=tag
-            )
+            current_tag = Tag.objects.get(id=tag)
             TagsRecipes.objects.create(
                 tag=current_tag,
                 recipe=recipe
             )
         return recipe
+
+    # REVISION NOTE: compare this function with the same part
+    # in create method. Most likely it can be merged
+    def add_ingredients(self, recipe, ingredients):
+        for ingredient in ingredients:
+            IngredientRecipes.objects.create(
+                ingredient_id=ingredient.get('ingredient').get('id'),
+                amount=ingredient.get('amount'),
+                recipe=recipe
+            )
+
+    def update(self, instance, validated_data):
+        """Update recipe"""
+        ingredients = validated_data.pop('ingredientrecipes_set')
+        tags = validated_data.pop('tags')
+        super().update(instance, validated_data)
+        instance.ingredients.clear()
+        instance.tags.set(tags)
+        self.add_ingredients(instance, ingredients)
+        instance.save()
+        return instance
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -146,18 +172,17 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 class RecipesGetSerializer(serializers.ModelSerializer):
     author = UsersSerializer()
-    tags = serializers.SerializerMethodField()
+    tags = TagsSerializer(many=True)
+    ingredients = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipes
         fields = (
             'id', 'tags', 'author', 'ingredients',
-            'name', 'image', 'text', 'cooking_time')
+            'name', 'image', 'text', 'cooking_time',)
         # 'is_favorited', 'is_in_shopping_cart',
 
-    def get_tags(self, obj):
-        _tags = obj.tags.all()
-        print(_tags)
-        return TagsRecipesSerializer(
-            _tags, many=True, context=self.context
-        ).data
+    def get_ingredients(self, obj):
+        return obj.ingredients.values(
+            'id', 'name', 'measurement_unit',
+            amount=F('ingredientrecipe__amount'))

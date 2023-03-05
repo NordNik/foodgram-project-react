@@ -39,11 +39,12 @@ class Recipes(models.Model):
         Ingredient,
         through='IngredientRecipes',
         related_name='recipes'
-        )
+    )
     tags = models.ManyToManyField(
         Tag,
         through='TagsRecipes',
-        related_name='tags')
+        related_name='tags'
+    )
     cooking_time = models.IntegerField(verbose_name='Duration')
 
     class Meta:
@@ -51,11 +52,15 @@ class Recipes(models.Model):
         ordering = ['-cooking_time']
 
     def __str__(self):
-        return self.title
+        return self.name
 
 
 class IngredientRecipes(models.Model):
-    ingredient = models.ForeignKey(Ingredient, on_delete=models.CASCADE)
+    ingredient = models.ForeignKey(
+        Ingredient,
+        on_delete=models.CASCADE,
+        related_name='ingredientrecipe'
+    )
     recipe = models.ForeignKey(Recipes, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=5, decimal_places=2, blank=True)
 
