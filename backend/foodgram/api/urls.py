@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 
 from .v1.views import (
     RecipesViewSet, IngredientsViewSet, TagsViewSet,
-    UsersViewSet, MyObtainTokenPairView, RegisterSerializer)
+    UsersViewSet)  # MyObtainTokenPairView, RegisterSerializer,)
 
 v1_router = DefaultRouter()
 v1_router.register('recipes', RecipesViewSet, basename='users')

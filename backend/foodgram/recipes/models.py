@@ -46,6 +46,12 @@ class Recipes(models.Model):
         related_name='tags'
     )
     cooking_time = models.IntegerField(verbose_name='Duration')
+    shopping_cart = models.ManyToManyField(
+        User,
+        related_name='shopping_cart',
+        verbose_name='shopping_cart',
+        blank=True
+    )
 
     class Meta:
         verbose_name_plural = 'Recipes'
