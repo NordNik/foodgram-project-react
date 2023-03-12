@@ -121,7 +121,7 @@ class RecipesSerializer(serializers.ModelSerializer):
         return instance
 
 
-class ShoppingCartSerializer(serializers.ModelSerializer):
+class ShoppingFavoriteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipes

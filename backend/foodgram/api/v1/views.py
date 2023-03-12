@@ -15,7 +15,7 @@ from .paginator import UsersPagination  # paginate_page
 from .serializers import (
     IngredientsSerializer, RecipesSerializer, TagsSerializer,
     UsersSerializer, MyTokenObtainPairSerializer, RegisterSerializer,
-    RecipesGetSerializer, IngredientRecipes, ShoppingCartSerializer)
+    RecipesGetSerializer, IngredientRecipes, ShoppingFavoriteSerializer)
 
 
 class RecipesViewSet(viewsets.ModelViewSet):
@@ -33,30 +33,39 @@ class RecipesViewSet(viewsets.ModelViewSet):
             return RecipesSerializer
         return RecipesGetSerializer
 
-    @action(methods=['POST', 'DELETE'], detail=True)
-    def shopping_cart(self, request, pk):
-        """Add or delete recipe to/from shopping cart"""
-        shopping_list = request.user.shopping_cart
-        if_obj = shopping_list.filter(pk=pk).exists()
+    def add_or_delete(self, request, pk, param):
+        """create actions for favorite and shopping cart endpoints"""
+        _objects = param
+        if_obj = _objects.filter(pk=pk).exists()
         if request.method == 'DELETE' and if_obj:
-            shopping_list.clear()
+            _objects.clear()
             return Response(status=status.HTTP_204_NO_CONTENT)
         if request.method == 'POST' and not if_obj:
-            shopping_list.add(pk)
-            serializer = ShoppingCartSerializer(
-                shopping_list.get(pk=pk),
+            _objects.add(pk)
+            serializer = ShoppingFavoriteSerializer(
+                _objects.get(pk=pk),
                 context={'request': request}
             )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
+    @action(methods=['POST', 'DELETE'], detail=True)
+    def favorite(self, request, pk):
+        """Add or delete recipe to/from list of favorites"""
+        return self.add_or_delete(request, pk, request.user.is_favorite)
+
+    @action(methods=['POST', 'DELETE'], detail=True)
+    def shopping_cart(self, request, pk):
+        """Add or delete recipe to/from shopping cart"""
+        return self.add_or_delete(request, pk, request.user.shopping_cart)
+
     @action(methods=['GET'], detail=False)
     def download_shopping_cart(self, request):
         """Return a file with the list of ingredients from favorite recipes"""
         # extract data from favorite recipes
-        fav_recipes = request.user.shopping_cart.all()
+        shop_recipes = request.user.shopping_cart.all()
         ingredients = IngredientRecipes.objects.filter(
-            recipe__in=fav_recipes
+            recipe__in=shop_recipes
         ).values(
             'ingredient__name', 'ingredient__measurement_unit'
         ).annotate(sum_amount=Sum('amount'))

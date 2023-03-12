@@ -52,6 +52,12 @@ class Recipes(models.Model):
         verbose_name='shopping_cart',
         blank=True
     )
+    is_favorite = models.ManyToManyField(
+        User,
+        related_name='is_favorite',
+        verbose_name='is_favorite',
+        blank=True
+    )
 
     class Meta:
         verbose_name_plural = 'Recipes'
