@@ -1,4 +1,5 @@
 from django.db.models import F
+from djoser.serializers import UserCreateSerializer
 from rest_framework import serializers
 import webcolors
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
@@ -146,6 +147,24 @@ class UsersSerializer(serializers.ModelSerializer):
             'last_name', 'is_subscribed')
 
 
+class UserAuthSerializer(UserCreateSerializer):
+    is_subscribed = serializers.SerializerMethodField(read_only=True)
+
+    class Meta(UserCreateSerializer.Meta):
+        fields = (
+            'username', 'id', 'email', 'first_name', 'last_name', 'password',
+            'is_subscribed',
+        )
+        extra_kwargs = {'password': {'write_only': True}}
+        model = User
+
+    def get_is_subscribed(self, obj):
+        user = self.context.get('request').user
+        if user.is_authenticated:
+            return user.followers.filter(pk=obj.pk).exists()
+        return False
+
+
 class RegisterSerializer(serializers.ModelSerializer):
     username = serializers.CharField(
         write_only=False,
@@ -186,8 +205,8 @@ class RecipesGetSerializer(serializers.ModelSerializer):
         model = Recipes
         fields = (
             'id', 'tags', 'author', 'ingredients',
-            'name', 'image', 'text', 'cooking_time',)
-        # 'is_favorited', 'is_in_shopping_cart',
+            'name', 'image', 'text', 'cooking_time',
+            'is_favorited', 'is_in_shopping_cart',)
 
     def get_ingredients(self, obj):
         return obj.ingredients.values(

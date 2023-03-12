@@ -83,6 +83,7 @@ class IngredientRecipes(models.Model):
 class TagsRecipes(models.Model):
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
     recipe = models.ForeignKey(Recipes, on_delete=models.CASCADE)
+    slug = models.SlugField()
 
     def __str__(self):
         return f'{self.tag} {self.recipe}'

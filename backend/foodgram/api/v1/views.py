@@ -1,7 +1,6 @@
 from django.db.models import Sum
 from django.http.response import HttpResponse
-from rest_framework import viewsets, filters, permissions
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import viewsets, permissions
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.decorators import action
 from rest_framework import status
@@ -9,21 +8,37 @@ from rest_framework.response import Response
 
 
 from users.models import User
-# from .permissions import IsAutheticatedOrRegistration
 from recipes.models import Recipes, Tag, Ingredient
-from .paginator import UsersPagination  # paginate_page
+from .permissions import RecipePermission
 from .serializers import (
     IngredientsSerializer, RecipesSerializer, TagsSerializer,
     UsersSerializer, MyTokenObtainPairSerializer, RegisterSerializer,
-    RecipesGetSerializer, IngredientRecipes, ShoppingFavoriteSerializer)
+    RecipesGetSerializer, IngredientRecipes, ShoppingFavoriteSerializer,
+    UserAuthSerializer)
+
+
+def add_or_delete(request, pk, param, serializer):
+    """create actions for favorite and shopping cart endpoints"""
+    _objects = param
+    if_obj = _objects.filter(pk=pk).exists()
+    if request.method == 'DELETE' and if_obj:
+        _objects.clear()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    if request.method == 'POST' and not if_obj:
+        _objects.add(pk)
+        _serializer = serializer(
+            _objects.get(pk=pk),
+            context={'request': request}
+        )
+        return Response(_serializer.data, status=status.HTTP_201_CREATED)
+    return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 class RecipesViewSet(viewsets.ModelViewSet):
     """Allows to operate with recipes"""
     queryset = Recipes.objects.all()
     serializer_class = RecipesSerializer
-    # paginator = [paginate_page]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [RecipePermission]
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -33,31 +48,23 @@ class RecipesViewSet(viewsets.ModelViewSet):
             return RecipesSerializer
         return RecipesGetSerializer
 
-    def add_or_delete(self, request, pk, param):
-        """create actions for favorite and shopping cart endpoints"""
-        _objects = param
-        if_obj = _objects.filter(pk=pk).exists()
-        if request.method == 'DELETE' and if_obj:
-            _objects.clear()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        if request.method == 'POST' and not if_obj:
-            _objects.add(pk)
-            serializer = ShoppingFavoriteSerializer(
-                _objects.get(pk=pk),
-                context={'request': request}
-            )
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
-
     @action(methods=['POST', 'DELETE'], detail=True)
     def favorite(self, request, pk):
         """Add or delete recipe to/from list of favorites"""
-        return self.add_or_delete(request, pk, request.user.is_favorite)
+        return add_or_delete(
+            request,
+            pk,
+            request.user.is_favorite,
+            ShoppingFavoriteSerializer)
 
     @action(methods=['POST', 'DELETE'], detail=True)
     def shopping_cart(self, request, pk):
         """Add or delete recipe to/from shopping cart"""
-        return self.add_or_delete(request, pk, request.user.shopping_cart)
+        return add_or_delete(
+            request,
+            pk,
+            request.user.shopping_cart,
+            ShoppingFavoriteSerializer)
 
     @action(methods=['GET'], detail=False)
     def download_shopping_cart(self, request):
@@ -94,7 +101,7 @@ class IngredientsViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientsSerializer
     permission_classes = (permissions.AllowAny, )
-    filter_backends = (filters.SearchFilter, )
+    # filter_backends = (filters.SearchFilter, )
     search_fields = ('name',)
 
 
@@ -103,7 +110,7 @@ class TagsViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagsSerializer
     permission_classes = (permissions.AllowAny, )
-    filter_backends = (filters.SearchFilter, )
+    # filter_backends = (filters.SearchFilter, )
     search_fields = ('name',)
 
 
@@ -111,12 +118,34 @@ class UsersViewSet(viewsets.ModelViewSet):
     """Allows to operate with users"""
     queryset = User.objects.all()
     permission_classes = (permissions.IsAuthenticated,)
-    pagination_class = UsersPagination
 
     def get_serializer_class(self):
         if self.request.method in ('POST', 'PATCH',):
             return RegisterSerializer
         return UsersSerializer
+
+    @action(methods=['POST', 'DELETE'], detail=True)
+    def subscribe(self, request, pk):
+        """Add or delete subscription"""
+        _follower = self.get_object()
+        if request.user == _follower:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        return add_or_delete(
+            request,
+            pk,
+            request.user.followers,
+            UserAuthSerializer)
+
+    @action(methods=['GET'], detail=False)
+    def subscriptions(self, request):
+        """Allows to get list of subscribes"""
+        user = request.user
+        followers = user.followers.all()
+        pages = self.paginate_queryset(followers)
+        serializer = UsersSerializer(
+            pages, many=True, context={'request': request}
+        )
+        return self.get_paginated_response(serializer.data)
 
 
 class MyObtainTokenPairView(TokenObtainPairView):
