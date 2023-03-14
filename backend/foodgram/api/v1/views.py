@@ -14,7 +14,7 @@ from .serializers import (
     IngredientsSerializer, RecipesSerializer, TagsSerializer,
     UsersSerializer, MyTokenObtainPairSerializer, RegisterSerializer,
     RecipesGetSerializer, IngredientRecipes, ShoppingFavoriteSerializer,
-    UserAuthSerializer)
+    UserAuthSerializer, SetPasswordSerializer)
 
 
 def add_or_delete(request, pk, param, serializer):
@@ -54,7 +54,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
         return add_or_delete(
             request,
             pk,
-            request.user.is_favorite,
+            request.user.is_favorited,
             ShoppingFavoriteSerializer)
 
     @action(methods=['POST', 'DELETE'], detail=True)
@@ -117,12 +117,33 @@ class TagsViewSet(viewsets.ReadOnlyModelViewSet):
 class UsersViewSet(viewsets.ModelViewSet):
     """Allows to operate with users"""
     queryset = User.objects.all()
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.AllowAny,)
 
     def get_serializer_class(self):
         if self.request.method in ('POST', 'PATCH',):
             return RegisterSerializer
         return UsersSerializer
+
+    @action(
+        methods=['POST'],
+        detail=False,
+        permission_classes=[permissions.IsAuthenticated])
+    def set_password(self, request):
+        """Allows to change password if current password is right"""
+        print(request.user.password)
+        print(request.data)
+        user = request.user
+        serializer = SetPasswordSerializer(data=request.data)
+        if serializer.is_valid():
+            current_password = serializer.data.get('current_password')
+            if not user.check_password(current_password):
+                content = {'current_password': 'Wrong current password'}
+                return Response(content, status=status.HTTP_400_BAD_REQUEST)
+            user.set_password(serializer.data.get('new_password'))
+            user.save()
+            content = {'Password has been changed succesfully'}
+            return Response(content, status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_400_BAD_REQUEST)
 
     @action(methods=['POST', 'DELETE'], detail=True)
     def subscribe(self, request, pk):

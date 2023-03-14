@@ -2,6 +2,8 @@ from django.db.models import F
 from djoser.serializers import UserCreateSerializer
 from rest_framework import serializers
 import webcolors
+import base64
+from drf_extra_fields.fields import Base64ImageField
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework.validators import UniqueValidator
 
@@ -23,6 +25,20 @@ class Hex2NameColor(serializers.Field):
             raise serializers.ValidationError(
                 'there is no name for this tag')
         return data
+
+
+class Base64ToFile(serializers.Field):
+    """Transforms base64 string to image file"""
+    def to_representation(self, value):
+        return value
+
+    def to_internal_value(self, data):
+        try:
+            image = base64.b64decode(data)
+        except ValueError:
+            raise serializers.ValidationError(
+                'something wrong with loaded image')
+        return image
 
 
 class TagsSerializer(serializers.ModelSerializer):
@@ -69,10 +85,19 @@ class RecipesSerializer(serializers.ModelSerializer):
         child=serializers.IntegerField(),
         write_only=True
     )
+    image = Base64ImageField()
 
     class Meta:
         model = Recipes
         fields = '__all__'
+
+    def add_ingredients(self, recipe, ingredients):
+        for ingredient in ingredients:
+            IngredientRecipes.objects.create(
+                ingredient_id=ingredient.get('ingredient').get('id'),
+                amount=ingredient.get('amount'),
+                recipe=recipe
+            )
 
     def create(self, validated_data):
         """Create new recipe record in Recipe table"""
@@ -83,15 +108,9 @@ class RecipesSerializer(serializers.ModelSerializer):
         tags = validated_data.pop('tags')
         recipe = Recipes.objects.create(**validated_data)
 
-        # for each ingresient and tag create record in related model
-        for ingredient in ingredients:
-            current_ingredient = Ingredient.objects.get(
-                id=ingredient.get('ingredient').get('id')
-            )
-            IngredientRecipes.objects.create(
-                ingredient=current_ingredient,
-                recipe=recipe,
-                amount=ingredient.get('amount'))
+        # for each ingredient and tag create record in related model
+        # for ingredients use earlier defined function add_ingredients
+        self.add_ingredients(recipe, ingredients)
         for tag in tags:
             current_tag = Tag.objects.get(id=tag)
             TagsRecipes.objects.create(
@@ -99,16 +118,6 @@ class RecipesSerializer(serializers.ModelSerializer):
                 recipe=recipe
             )
         return recipe
-
-    # REVISION NOTE: compare this function with the same part
-    # in create method. Most likely it can be merged
-    def add_ingredients(self, recipe, ingredients):
-        for ingredient in ingredients:
-            IngredientRecipes.objects.create(
-                ingredient_id=ingredient.get('ingredient').get('id'),
-                amount=ingredient.get('amount'),
-                recipe=recipe
-            )
 
     def update(self, instance, validated_data):
         """Update recipe"""
@@ -196,10 +205,17 @@ class RegisterSerializer(serializers.ModelSerializer):
         return user
 
 
+class SetPasswordSerializer(serializers.Serializer):
+    current_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True)
+
+
 class RecipesGetSerializer(serializers.ModelSerializer):
     author = UsersSerializer()
     tags = TagsSerializer(many=True)
     ingredients = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField()
+    is_favorited = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipes
@@ -212,3 +228,9 @@ class RecipesGetSerializer(serializers.ModelSerializer):
         return obj.ingredients.values(
             'id', 'name', 'measurement_unit',
             amount=F('ingredientrecipe__amount'))
+
+    def get_is_in_shopping_cart(self, obj):
+        return bool(obj.shopping_cart.values())
+
+    def get_is_favorited(self, obj):
+        return bool(obj.is_favorited.values())

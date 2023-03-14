@@ -1,12 +1,6 @@
 from rest_framework import permissions
 
 
-'''class IsAutheticatedOrRegistration(permissions.BasePermission):
-    """Without token only registration is allowed"""
-    def has_permission(self, request, view):
-        return (request.method == 'POST')'''
-
-
 class RecipePermission(permissions.BasePermission):
     """Custom permission class"""
     def has_permission(self, request, view):
@@ -18,6 +12,6 @@ class RecipePermission(permissions.BasePermission):
         """Unsave methods and GET method for shopping lists"""
         return (
             request.method in permissions.SAFE_METHODS
-            or (request.user.is_authenicated
+            or (request.user.is_authenticated
                 and (obj.author == request.user or request.method == 'POST'))
         )

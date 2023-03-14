@@ -6,6 +6,7 @@ from users.models import User
 class Tag(models.Model):
     name = models.CharField(max_length=200)
     color = models.CharField(max_length=200)
+    slug = models.SlugField()
 
     def __str__(self):
         return self.name
@@ -31,8 +32,7 @@ class Recipes(models.Model):
     name = models.CharField(max_length=200)
     image = models.ImageField(
         'Photo',
-        upload_to='recipes/',
-        blank=True
+        upload_to='recipes_photo/'
     )
     text = models.TextField()
     ingredients = models.ManyToManyField(
@@ -52,7 +52,7 @@ class Recipes(models.Model):
         verbose_name='shopping_cart',
         blank=True
     )
-    is_favorite = models.ManyToManyField(
+    is_favorited = models.ManyToManyField(
         User,
         related_name='is_favorite',
         verbose_name='is_favorite',
@@ -83,7 +83,6 @@ class IngredientRecipes(models.Model):
 class TagsRecipes(models.Model):
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
     recipe = models.ForeignKey(Recipes, on_delete=models.CASCADE)
-    slug = models.SlugField()
 
     def __str__(self):
         return f'{self.tag} {self.recipe}'

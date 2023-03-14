@@ -135,3 +135,6 @@ dmypy.json
 .vscode/
 .DS_Store
 csv_import.py
+recipes_photo/
+recipes/migrations/
+users/migrations/
