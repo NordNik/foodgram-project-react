@@ -42,6 +42,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
     permission_classes = [RecipePermission]
     filter_backends = (DjangoFilterBackend, filters.OrderingFilter,)
     filterset_fields = ('tags',)
+    ordering_fields = ()
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -118,7 +119,7 @@ class TagsViewSet(viewsets.ReadOnlyModelViewSet):
 class UsersViewSet(viewsets.ModelViewSet):
     """Allows to operate with users"""
     queryset = User.objects.all()
-    permission_classes = (permissions.AllowAny,)
+    permission_classes = (permissions.IsAuthenticated,)
 
     def get_serializer_class(self):
         if self.request.method in ('POST', 'PATCH',):

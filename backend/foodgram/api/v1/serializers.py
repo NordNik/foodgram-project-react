@@ -89,7 +89,7 @@ class RecipesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Recipes
-        fields = '__all__'
+        exclude = ('date_created',)
 
     def add_ingredients(self, recipe, ingredients):
         for ingredient in ingredients:

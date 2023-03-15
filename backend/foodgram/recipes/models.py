@@ -58,10 +58,11 @@ class Recipes(models.Model):
         verbose_name='is_favorite',
         blank=True
     )
+    date_created = models.DateField('Date created', auto_now_add=True)
 
     class Meta:
         verbose_name_plural = 'Recipes'
-        ordering = ['-cooking_time']
+        ordering = ['-date_created']
 
     def __str__(self):
         return self.name
