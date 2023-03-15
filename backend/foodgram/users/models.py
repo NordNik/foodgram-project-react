@@ -17,3 +17,9 @@ class User(AbstractUser):
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)
     is_subscribed = models.BooleanField(default=False)
+    followers = models.ManyToManyField(
+        to='self',
+        symmetrical=False,
+        verbose_name='Подписчики',
+        blank=True
+    )
