@@ -4,8 +4,9 @@ from rest_framework import viewsets, permissions
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.decorators import action
 from rest_framework import status
+from rest_framework import filters
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.response import Response
-
 
 from users.models import User
 from recipes.models import Recipes, Tag, Ingredient
@@ -39,6 +40,8 @@ class RecipesViewSet(viewsets.ModelViewSet):
     queryset = Recipes.objects.all()
     serializer_class = RecipesSerializer
     permission_classes = [RecipePermission]
+    filter_backends = (DjangoFilterBackend, filters.OrderingFilter,)
+    filterset_fields = ('tags',)
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
@@ -101,7 +104,7 @@ class IngredientsViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientsSerializer
     permission_classes = (permissions.AllowAny, )
-    # filter_backends = (filters.SearchFilter, )
+    filter_backends = (DjangoFilterBackend,)
     search_fields = ('name',)
 
 
@@ -110,8 +113,6 @@ class TagsViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagsSerializer
     permission_classes = (permissions.AllowAny, )
-    # filter_backends = (filters.SearchFilter, )
-    search_fields = ('name',)
 
 
 class UsersViewSet(viewsets.ModelViewSet):
