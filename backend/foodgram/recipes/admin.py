@@ -15,11 +15,6 @@ class tagrecipes_inline(admin.TabularInline):
 
 class RecipesAdmin(admin.ModelAdmin):
     inlines = (ingredientrecipes_inline, tagrecipes_inline,)
-    # list_display = ('pk', 'title', 'text', 'cooking_time')
-    # search_fields = ('title', 'text')
-    # list_filter = ('duration',)
-    # list_editable = ('tags',)
-    # empty_value_display = '-empty-'
 
 
 class IngredientAdmin(admin.ModelAdmin):

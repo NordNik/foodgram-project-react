@@ -1,4 +1,5 @@
 from django.db import models
+from datetime import date
 
 from users.models import User
 
@@ -58,7 +59,10 @@ class Recipes(models.Model):
         verbose_name='is_favorite',
         blank=True
     )
-    date_created = models.DateField('Date created', auto_now_add=True)
+    date_created = models.DateField(
+        'Date created',
+        auto_now_add=False,
+        default=date.today)
 
     class Meta:
         verbose_name_plural = 'Recipes'

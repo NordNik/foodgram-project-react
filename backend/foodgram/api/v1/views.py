@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.db.models import Sum
 from django.http.response import HttpResponse
 from rest_framework import viewsets, permissions
@@ -19,16 +20,14 @@ from .serializers import (
 
 
 def add_or_delete(request, pk, param, serializer):
-    """create actions for favorite and shopping cart endpoints"""
-    _objects = param
-    if_obj = _objects.filter(pk=pk).exists()
-    if request.method == 'DELETE' and if_obj:
-        _objects.clear()
+    """create actions for /favorite and /shopping_cart endpoints"""
+    if request.method == 'DELETE' and param.filter(pk=pk).exists():
+        param.clear()
         return Response(status=status.HTTP_204_NO_CONTENT)
-    if request.method == 'POST' and not if_obj:
-        _objects.add(pk)
+    if request.method == 'POST' and not param.filter(pk=pk).exists():
+        param.add(pk)
         _serializer = serializer(
-            _objects.get(pk=pk),
+            param.get(pk=pk),
             context={'request': request}
         )
         return Response(_serializer.data, status=status.HTTP_201_CREATED)
@@ -53,6 +52,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
         return RecipesGetSerializer
 
     @action(methods=['POST', 'DELETE'], detail=True)
+    @transaction.atomic
     def favorite(self, request, pk):
         """Add or delete recipe to/from list of favorites"""
         return add_or_delete(
@@ -62,6 +62,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
             ShoppingFavoriteSerializer)
 
     @action(methods=['POST', 'DELETE'], detail=True)
+    @transaction.atomic
     def shopping_cart(self, request, pk):
         """Add or delete recipe to/from shopping cart"""
         return add_or_delete(
@@ -70,27 +71,15 @@ class RecipesViewSet(viewsets.ModelViewSet):
             request.user.shopping_cart,
             ShoppingFavoriteSerializer)
 
-    @action(methods=['GET'], detail=False)
-    def download_shopping_cart(self, request):
-        """Return a file with the list of ingredients from favorite recipes"""
-        # extract data from favorite recipes
-        shop_recipes = request.user.shopping_cart.all()
+    def extract_data_from_favorites(self, request):
         ingredients = IngredientRecipes.objects.filter(
-            recipe__in=shop_recipes
+            recipe__in=request.user.shopping_cart.all()
         ).values(
             'ingredient__name', 'ingredient__measurement_unit'
         ).annotate(sum_amount=Sum('amount'))
+        return ingredients
 
-        # create file text in format "ingredient (unit) - amount"
-        ingredients_list_text = 'Below is your shopping list for today:\n'
-        for _ingredient in ingredients:
-            name = _ingredient.get('ingredient__name')
-            m_unit = _ingredient.get('ingredient__measurement_unit')
-            amount = _ingredient.get('sum_amount')
-            ingredients_list_text += f'{name} ({m_unit}) - {amount}\n'
-        ingredients_list_text += 'Enjoy your meal!'
-
-        # return the file
+    def return_file(self, request, ingredients_list_text):
         filename = f'Shopping_list_{request.user.username}.txt'
         response = HttpResponse(
             ingredients_list_text, content_type='text/plain')
@@ -98,6 +87,20 @@ class RecipesViewSet(viewsets.ModelViewSet):
             f'attachment; filename="{filename}"'
         )
         return response
+
+    @action(methods=['GET'], detail=False)
+    @transaction.atomic
+    def download_shopping_cart(self, request):
+        """Return a file with the list of ingredients from favorite recipes"""
+        ingredients = self.extract_data_from_favorites(request)
+        ingredients_list_text = 'Below is your shopping list for today:\n'
+        for _ingredient in ingredients:
+            name = _ingredient.get('ingredient__name')
+            m_unit = _ingredient.get('ingredient__measurement_unit')
+            amount = _ingredient.get('sum_amount')
+            ingredients_list_text += f'{name} ({m_unit}) - {amount}\n'
+        ingredients_list_text += 'Enjoy your meal!'
+        return self.return_file(request, ingredients_list_text)
 
 
 class IngredientsViewSet(viewsets.ReadOnlyModelViewSet):
@@ -130,24 +133,23 @@ class UsersViewSet(viewsets.ModelViewSet):
         methods=['POST'],
         detail=False,
         permission_classes=[permissions.IsAuthenticated])
+    @transaction.atomic
     def set_password(self, request):
         """Allows to change password if current password is right"""
-        print(request.user.password)
-        print(request.data)
-        user = request.user
         serializer = SetPasswordSerializer(data=request.data)
         if serializer.is_valid():
             current_password = serializer.data.get('current_password')
-            if not user.check_password(current_password):
+            if not request.user.check_password(current_password):
                 content = {'current_password': 'Wrong current password'}
                 return Response(content, status=status.HTTP_400_BAD_REQUEST)
-            user.set_password(serializer.data.get('new_password'))
-            user.save()
+            request.user.set_password(serializer.data.get('new_password'))
+            request.user.save()
             content = {'Password has been changed succesfully'}
             return Response(content, status=status.HTTP_200_OK)
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
     @action(methods=['POST', 'DELETE'], detail=True)
+    @transaction.atomic
     def subscribe(self, request, pk):
         """Add or delete subscription"""
         _follower = self.get_object()
@@ -160,10 +162,10 @@ class UsersViewSet(viewsets.ModelViewSet):
             UserAuthSerializer)
 
     @action(methods=['GET'], detail=False)
+    @transaction.atomic
     def subscriptions(self, request):
         """Allows to get list of subscribes"""
-        user = request.user
-        followers = user.followers.all()
+        followers = request.user.followers.all()
         pages = self.paginate_queryset(followers)
         serializer = UsersSerializer(
             pages, many=True, context={'request': request}
