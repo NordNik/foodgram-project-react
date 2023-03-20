@@ -43,6 +43,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
     filterset_fields = ('tags',)
     ordering_fields = ()
 
+    @transaction.atomic
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
