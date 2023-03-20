@@ -102,7 +102,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.AllowAny',
     ),
-    'DEFAULT_PAGINATION_CLASS': 'api.v1.paginator.GeneralPagination',
+    'DEFAULT_PAGINATION_CLASS': 'api.paginator.GeneralPagination',
 }
 
 DJOSER = {
