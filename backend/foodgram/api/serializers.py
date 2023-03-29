@@ -1,3 +1,4 @@
+from django.db import transaction
 from django.db.models import F
 from djoser.serializers import UserCreateSerializer
 from rest_framework import serializers
@@ -91,6 +92,7 @@ class RecipesSerializer(serializers.ModelSerializer):
         model = Recipes
         exclude = ('date_created',)
 
+    @transaction.atomic
     def add_ingredients(self, recipe, ingredients):
         for ingredient in ingredients:
             IngredientRecipes.objects.create(
@@ -99,6 +101,7 @@ class RecipesSerializer(serializers.ModelSerializer):
                 recipe=recipe
             )
 
+    @transaction.atomic
     def create(self, validated_data):
         """Create new recipe record in Recipe table"""
 
@@ -119,6 +122,7 @@ class RecipesSerializer(serializers.ModelSerializer):
             )
         return recipe
 
+    @transaction.atomic
     def update(self, instance, validated_data):
         """Update recipe"""
         ingredients = validated_data.pop('ingredientrecipes_set')
@@ -193,6 +197,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             'email', 'id', 'username', 'password',
             'first_name', 'last_name',)
 
+    @transaction.atomic
     def create(self, validated_data):
         user = User.objects.create(
             username=validated_data['username'],
