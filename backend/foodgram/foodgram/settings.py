@@ -10,6 +10,7 @@ SECRET_KEY = str(os.getenv('SECRET_KEY'))
 DEBUG = False
 
 ALLOWED_HOSTS = [
+    'frontend',
     'web',
     '127.0.0.1',
     'localhost',
