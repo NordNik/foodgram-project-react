@@ -42,6 +42,23 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://frontend',
+    'https://web',
+    'http://frontend',
+    'http://web',
+    'https://127.0.0.1',
+    'http://127.0.0.1',
+    'http://172.22.0.1'
+    'localhost',
+    'niknord.ddns.net',
+    # '127.0.0.1/admin/',
+    # '178.154.199.237', 
+    # 'https://niknord.ddns.net',
+]
+
 
 ROOT_URLCONF = 'foodgram.urls'
 
@@ -125,3 +142,7 @@ REST_FRAMEWORK = {
 DJOSER = {
     'LOGIN_FIELD': 'email'
 }
+
+CSRF_COOKIE_SECURE = False
+CSRF_FAILURE_VIEW = 'core.views.csrf_failure'
+CORS_ALLOW_ALL_ORIGINS = True
