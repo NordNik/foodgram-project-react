@@ -4,7 +4,6 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     RecipesViewSet, IngredientsViewSet, TagsViewSet, UsersViewSet)
 
-
 foodgram_router = DefaultRouter()
 foodgram_router.register('recipes', RecipesViewSet, basename='users')
 foodgram_router.register(

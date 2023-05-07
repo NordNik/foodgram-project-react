@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-from dotenv import load_dotenv
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -31,9 +30,15 @@ CSRF_TRUSTED_ORIGINS = [
     'https://backend',
     'http://172.20.0.1',
     'http://127.0.0.1',
-    'http://foodgram.online',
-    'http://45.12.238.219'
     'http://*.localhost',
+    'https://frontend',
+    'http://web',
+    'https://127.0.0.1',
+    'http://172.22.0.1'
+    'niknord.ddns.net',
+    '127.0.0.1/admin/',
+    '178.154.199.237',
+    'https://niknord.ddns.net',
 ]
 
 INSTALLED_APPS = [
@@ -63,21 +68,6 @@ MIDDLEWARE = [
 ]
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-# CSRF_TRUSTED_ORIGINS = [
-#     'https://frontend',
-#     'https://web',
-#     'http://frontend',
-#     'http://web',
-#     'https://127.0.0.1',
-#     'http://127.0.0.1',
-#     'http://172.22.0.1'
-#     # 'localhost',
-#     # 'niknord.ddns.net',
-#     # '127.0.0.1/admin/',
-#     # '178.154.199.237', 
-#     # 'https://niknord.ddns.net',
-# ]
-
 
 ROOT_URLCONF = 'foodgram.urls'
 
@@ -100,11 +90,11 @@ TEMPLATES = [
 WSGI_APPLICATION = 'foodgram.wsgi.application'
 
 
-# DATABASES = { 
-#     'default': { 
-#         'ENGINE': 'django.db.backends.sqlite3', 
-#         'NAME': BASE_DIR / 'db.sqlite3', 
-#     } 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
 # }
 
 DATABASES = {
@@ -150,7 +140,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media') 
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -169,7 +159,3 @@ REST_FRAMEWORK = {
 DJOSER = {
     'LOGIN_FIELD': 'email'
 }
-
-#CSRF_COOKIE_SECURE = False
-#CSRF_FAILURE_VIEW = 'core.views.csrf_failure'
-#CORS_ALLOW_ALL_ORIGINS = True
