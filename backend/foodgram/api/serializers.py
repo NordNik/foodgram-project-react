@@ -7,7 +7,6 @@ import base64
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework.validators import UniqueValidator
-
 from recipes.models import (
     Ingredient, IngredientRecipes, Recipes,
     Tag, TagsRecipes)

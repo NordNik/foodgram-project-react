@@ -3,26 +3,26 @@ from django.contrib import admin
 from .models import Recipes, Ingredient, Tag, IngredientRecipes, TagsRecipes
 
 
-class ingredientrecipes_inline(admin.TabularInline):
+class IngredientrecipesInline(admin.TabularInline):
     model = IngredientRecipes
     extra = 1
 
 
-class tagrecipes_inline(admin.TabularInline):
+class TagrecipesInline(admin.TabularInline):
     model = TagsRecipes
     extra = 1
 
 
 class RecipesAdmin(admin.ModelAdmin):
-    inlines = (ingredientrecipes_inline, tagrecipes_inline,)
+    inlines = (IngredientrecipesInline, TagrecipesInline,)
 
 
 class IngredientAdmin(admin.ModelAdmin):
-    inlines = (ingredientrecipes_inline, )
+    inlines = (IngredientrecipesInline, )
 
 
 class TagAdmin(admin.ModelAdmin):
-    inlines = (tagrecipes_inline, )
+    inlines = (TagrecipesInline, )
 
 
 admin.site.register(Ingredient)
