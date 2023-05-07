@@ -10,8 +10,8 @@ services:
       - foodgram_network
 
   web:
-    #build: ../backend/foodgram/
-    image: niknord/foodgram:v0
+    build: ../backend/foodgram/
+    # image: niknord/foodgram:v0
     restart: always
     volumes:
       - static_value:/app/static/
