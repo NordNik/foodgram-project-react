@@ -74,6 +74,12 @@ jobs:
         - backend_build_and_push_to_docker_hub
         - frontend_build_and_push_to_docker_hub
       steps:
+        - name: Install dependencies
+          run: | 
+            print(${{ secrets.HOST }})
+            print(${{ secrets.USER }})
+            print(${{ secrets.SSH_KEY }})
+            print(${{ secrets.PASSPHRASE }})
         - name: executing remote ssh commands to deploy
           uses: appleboy/ssh-action@master
           with:
