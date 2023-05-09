@@ -77,7 +77,9 @@ jobs:
         - name: Install dependencies
           run: | 
             a = ${{ secrets.HOST }}
-            print(a)
+            print(str(a))
+            b = 'go'
+            print(b)
             print(${{ secrets.HOST }})
             print(${{ secrets.USER }})
             print(${{ secrets.SSH_KEY }})
