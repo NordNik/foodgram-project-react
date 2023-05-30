@@ -83,8 +83,8 @@ jobs:
             passphrase: ${{ secrets.PASSPHRASE }}
             script: |
               cd foodgram-project-react/infra
-              # sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_backend:latest
-              # sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_frontend:latest
+              sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_backend:latest
+              sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_frontend:latest
               sudo docker-compose stop
               sudo docker-compose rm web
               sudo rm .env
