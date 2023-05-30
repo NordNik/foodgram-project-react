@@ -24,7 +24,7 @@ CORS_ALLOWED_ORIGINS = [
     'http://172.20.0.1',
     'http://127.0.0.1',
     'http://foodgram.online',
-    'http://45.12.238.219'
+    'http://84.252.136.126'
 ]
 
 CSRF_TRUSTED_ORIGINS = [
@@ -39,7 +39,7 @@ CSRF_TRUSTED_ORIGINS = [
     'http://172.22.0.1'
     'niknord.ddns.net',
     '127.0.0.1/admin/',
-    '178.154.199.237',
+    '84.252.136.126',
     'https://niknord.ddns.net',
 ]
 
