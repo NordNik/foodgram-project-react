@@ -10,4 +10,3 @@ djangorestframework-simplejwt==4.7.2
 django-filter==21.1
 webcolors==1.12
 drf_extra_fields==3.4.1
-python-dotenv

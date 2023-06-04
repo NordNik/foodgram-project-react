@@ -38,8 +38,8 @@ CSRF_TRUSTED_ORIGINS = [
     'https://127.0.0.1',
     'http://172.22.0.1'
     'niknord.ddns.net',
-    '127.0.0.1/admin/',
-    '84.252.136.126',
+    'http://127.0.0.1/admin/',
+    'http://84.252.136.126',
     'https://niknord.ddns.net',
 ]
 
