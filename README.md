@@ -1,3 +1,5 @@
+[![Django-app workflow](https://github.com/NordNik/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg)](https://github.com/NordNik/foodgram-project-react/actions/workflows/foodgram_workflow.yml)
+
 # FOODGRAM
 
 # About
