@@ -10,8 +10,8 @@ services:
       - foodgram_network
 
   web:
-    build: ../backend/foodgram/
-    # image: niknord/foodgram:v0
+    # build: ../backend/foodgram/
+    image: niknord/foodgram:latest
     restart: always
     volumes:
       - static_value:/app/static/
@@ -25,11 +25,12 @@ services:
       - foodgram_network
 
   frontend:
-    build: ../frontend
+    # build: ../frontend
       # context: ../frontend
       # dockerfile: Dockerfile
     # ports:
     #   - "3000:3000"
+    image: niknord/frontend:latest
     volumes:
       - ./frontend/build/:/app/result_build/
     container_name: frontend
