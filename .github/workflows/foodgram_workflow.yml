@@ -85,7 +85,8 @@ jobs:
               cd foodgram-project-react/infra
               sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_backend:latest
               sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_frontend:latest
-              # sudo docker-compose stop
+              sudo docker-compose stop
+              sudo docker system prune
               # sudo docker-compose rm web
               # sudo docker-compose rm frontend
               # sudo docker-compose rm nginx
