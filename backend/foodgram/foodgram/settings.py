@@ -36,7 +36,7 @@ CSRF_TRUSTED_ORIGINS = [
     'https://frontend',
     'http://web',
     'https://127.0.0.1',
-    'http://172.22.0.1'
+    'http://172.22.0.1',
     'niknord.ddns.net',
     'http://127.0.0.1/admin/',
     'http://51.250.28.64',
