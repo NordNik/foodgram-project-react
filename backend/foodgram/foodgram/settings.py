@@ -16,6 +16,7 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     'localhost',
     'niknord.ddns.net',
+    '51.250.28.64',
 ]
 
 CORS_ALLOWED_ORIGINS = [
