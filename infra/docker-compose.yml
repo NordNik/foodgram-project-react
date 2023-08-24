@@ -14,8 +14,8 @@ services:
     image: niknord/foodgram:latest
     restart: always
     volumes:
-      - static_value:/static/
-      - media_value:/media/
+      - static_value:/app/static/
+      - media_value:/app/media/
     container_name: web
     depends_on:
       - db
