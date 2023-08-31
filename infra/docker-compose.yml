@@ -32,7 +32,7 @@ services:
     #   - "3000:3000"
     # image: niknord/frontend:latest
     volumes:
-      - ./frontend/build:/usr/share/nginx/html/
+      - ../frontend/build:/usr/share/nginx/html/
     #  - ../frontend/build/:/app/result_build/
     container_name: frontend
     depends_on:
