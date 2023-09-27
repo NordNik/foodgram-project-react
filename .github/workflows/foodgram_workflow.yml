@@ -95,6 +95,7 @@ jobs:
       needs:
         - backend_build_and_push_to_docker_hub
         - frontend_build_and_push_to_docker_hub
+        - gateway_build_and_push_to_docker_hub
       steps:
         - name: executing remote ssh commands to deploy
           uses: appleboy/ssh-action@master
