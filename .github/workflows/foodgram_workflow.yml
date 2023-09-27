@@ -109,6 +109,7 @@ jobs:
               sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_backend:latest
               sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_frontend:latest
               sudo docker-compose stop
+              sudo docker container rm $(sudo docker container ls -aq)
               sudo docker image rm $(sudo docker image ls -q)
               sudo docker-compose rm web
               sudo docker-compose rm frontend
@@ -122,6 +123,6 @@ jobs:
               echo DB_HOST=${{ secrets.DB_HOST }} | sudo tee -a .env
               echo DB_PORT=${{ secrets.DB_PORT }} | sudo tee -a .env
               echo SECRET_KEY=${{ secrets.SECRET_KEY }} | sudo tee -a .env
-              sudo docker-compose up -d --build
+              sudo docker-compose -f docker-compose.prod.yml up -d --build
               sudo docker-compose exec -T web python manage.py migrate
               sudo docker-compose exec -T web python manage.py collectstatic --no-input
