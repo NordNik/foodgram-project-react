@@ -13,7 +13,6 @@ services:
       - db_data:/var/lib/postgresql/data/
 
   web:
-    # build: ./backend/foodgram/
     image: niknord/foodgram_backend:latest
     restart: always
     volumes:
@@ -25,11 +24,6 @@ services:
       - ./.env
 
   frontend:
-    # build:
-    #   context: ./frontend
-    #   dockerfile: Dockerfile
-    # ports:
-    #   - "3000:3000"
     image: niknord/foodgram_frontend:latest
     volumes:
       - static:/frontend_static
@@ -39,7 +33,7 @@ services:
     command: cp -r /app/build/. /frontend_static/
 
   gateway:
-    build: ./gateway/
+    image: niknord/foodgram_gateway:latest
     env_file: .env
     volumes:
       - static:/staticfiles/
@@ -47,8 +41,3 @@ services:
       - 8000:80
     depends_on:
       - web
-  
-# networks:
-#   foodgram_network:
-#     driver: bridge
-#     name: foodgram_network

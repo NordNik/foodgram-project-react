@@ -138,3 +138,6 @@ csv_import.py
 recipes_photo/
 recipes/migrations/
 users/migrations/
+
+# local docker-compose
+docker-compose.yml
