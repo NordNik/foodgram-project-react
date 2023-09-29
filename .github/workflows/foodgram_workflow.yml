@@ -113,9 +113,9 @@ jobs:
               sudo docker container stop $(sudo docker container ls -aq)
               sudo docker container rm $(sudo docker container ls -aq)
               sudo docker image rm $(sudo docker image ls -q)
-              sudo docker-compose rm web
-              sudo docker-compose rm frontend
-              sudo docker-compose rm gateway
+              # sudo docker-compose rm web
+              # sudo docker-compose rm frontend
+              # sudo docker-compose rm gateway
               # sudo rm .env
               # sudo touch .env
               # echo DB_ENGINE=${{ secrets.DB_ENGINE }} | sudo tee -a .env
