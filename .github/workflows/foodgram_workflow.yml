@@ -129,5 +129,6 @@ jobs:
               echo DB_PORT=${{ secrets.DB_PORT }} | sudo tee -a .env
               echo SECRET_KEY=${{ secrets.SECRET_KEY }} | sudo tee -a .env
               sudo docker-compose -f docker-compose.prod.yml up -d --build
-              sudo docker-compose exec -T web python manage.py migrate
-              sudo docker-compose exec -T web python manage.py collectstatic --no-input
+              sudo docker container exec web python manage.py migrate
+              sudo docker container exec web python manage.py collectstatic --no-input
+              sudo docker compose -f docker-compose.prod.yml exec web cp -r /app/backend_static/. /backend_static/static/
