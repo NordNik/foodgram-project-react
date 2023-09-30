@@ -123,7 +123,7 @@ class TagsViewSet(viewsets.ReadOnlyModelViewSet):
 class UsersViewSet(viewsets.ModelViewSet):
     """Allows to operate with users"""
     queryset = User.objects.all()
-    permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (permissions.AllowAny,)
 
     def get_serializer_class(self):
         if self.request.method in ('POST', 'PATCH',):
